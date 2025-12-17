@@ -17,7 +17,10 @@ import {
   VideoCameraIcon,
   PlusIcon,
   TrashIcon,
-  ClipboardDocumentCheckIcon
+  ClipboardDocumentCheckIcon,
+  Bars3Icon,
+  XMarkIcon,
+  HomeIcon
 } from '@heroicons/react/24/outline';
 import { SunIcon as SunIconSolid, MoonIcon as MoonIconSolid } from '@heroicons/react/24/solid';
 
@@ -85,8 +88,9 @@ const Background: React.FC<{ isNight: boolean }> = ({ isNight }) => (
 
 const App: React.FC = () => {
   const [isNightMode, setIsNightMode] = useState<boolean>(true);
-  const [mode, setMode] = useState<AppMode>(AppMode.PRODUCT);
+  const [mode, setMode] = useState<AppMode>(AppMode.HOME);
   const [language, setLanguage] = useState<Language>('id');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Mobile sidebar toggle
   
   // Generic Input (Used for Reference in Product/Character and Sources in Blender)
   const [inputImages, setInputImages] = useState<ImageFile[]>([]);
@@ -153,7 +157,8 @@ const App: React.FC = () => {
     inputText: isNightMode ? "text-white" : "text-slate-900",
     headerBg: isNightMode ? "bg-cyber-dark/80" : "bg-white/80",
     headerBorder: isNightMode ? "border-cyber-gray/50" : "border-slate-200",
-    activeMode: isNightMode ? "bg-cyber-gray/50" : "bg-sky-100",
+    sidebarBg: isNightMode ? "bg-black/40" : "bg-white/60",
+    activeMode: isNightMode ? "bg-cyber-gray/50 text-white" : "bg-sky-100 text-sky-900",
     activeModeBorder: isNightMode ? "" : "border-sky-400",
   };
 
@@ -168,6 +173,7 @@ const App: React.FC = () => {
     setResultImage(null);
     setPromptOutput(null);
     setError(null);
+    setIsSidebarOpen(false); // Close mobile sidebar on select
     // Reset specific states
     setSelectedPose('none');
     setCustomPose('');
@@ -316,6 +322,7 @@ const App: React.FC = () => {
       fullPrompt = `
         Main Theme: ${posterTheme}.
         Text Content to Include: "${posterText}".
+        ${prompt ? `Additional Instructions: ${prompt}` : ''}
         
         Input Image Guide:
         - The first ${prodCount} image(s) are the PRODUCT(S) to feature.
@@ -452,133 +459,163 @@ const App: React.FC = () => {
     { key: 'custom', label: t.config.styles.custom },
   ];
 
+  // Helper component for Sidebar items
+  const SidebarItem = ({ modeKey, icon: Icon, colorClass }: { modeKey: AppMode, icon: any, colorClass: string }) => (
+    <button
+      onClick={() => handleModeChange(modeKey)}
+      className={`
+        w-full flex items-center gap-3 p-3 rounded-lg text-sm font-bold font-display tracking-wide transition-all
+        ${mode === modeKey 
+          ? `${s.activeMode} border-l-4 ${colorClass.replace('text-', 'border-')}` 
+          : `text-gray-400 hover:text-white hover:bg-white/5`
+        }
+      `}
+    >
+      <Icon className={`w-5 h-5 ${mode === modeKey ? '' : colorClass}`} />
+      <span>{t.modules[modeKey].title}</span>
+    </button>
+  );
+
   return (
-    <div className={`min-h-screen ${s.textMain} font-body selection:bg-cyber-pink selection:text-white pb-20 overflow-x-hidden relative`}>
+    <div className={`h-screen flex flex-col ${s.textMain} font-body selection:bg-cyber-pink selection:text-white overflow-hidden relative`}>
       <Background isNight={isNightMode} />
       
-      {/* Header */}
-      <header className={`border-b ${s.headerBorder} ${s.headerBg} backdrop-blur-md sticky top-0 z-50 transition-colors duration-500`}>
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-cyber-cyan animate-pulse shadow-neon-cyan cyber-border"></div>
-            <h1 className={`text-2xl font-display font-bold ${s.textHeading} tracking-widest`}>
-              {t.appTitle}<span className="text-cyber-cyan">{t.appTitleSuffix}</span>
-            </h1>
+      {/* Header (Top Bar) */}
+      <header className={`border-b ${s.headerBorder} ${s.headerBg} backdrop-blur-md z-50 transition-colors duration-500 flex-shrink-0`}>
+        <div className="flex justify-between items-center px-4 py-3">
+          <div className="flex items-center gap-4">
+            <button className="lg:hidden" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+               {isSidebarOpen ? <XMarkIcon className="w-6 h-6"/> : <Bars3Icon className="w-6 h-6"/>}
+            </button>
+            <div className="flex items-center gap-2 cursor-pointer" onClick={() => handleModeChange(AppMode.HOME)}>
+              <div className="w-8 h-8 bg-cyber-cyan animate-pulse shadow-neon-cyan cyber-border"></div>
+              <h1 className={`text-xl font-display font-bold ${s.textHeading} tracking-widest`}>
+                {t.appTitle}<span className="text-cyber-cyan">{t.appTitleSuffix}</span>
+              </h1>
+            </div>
           </div>
           
           <div className="flex items-center gap-4">
              {/* Theme Toggle */}
              <button 
               onClick={() => setIsNightMode(!isNightMode)}
-              className={`p-2 rounded-full border transition-all ${isNightMode ? 'bg-cyber-dark border-yellow-400 text-yellow-400' : 'bg-white border-orange-400 text-orange-500'}`}
+              className={`p-1.5 rounded-full border transition-all ${isNightMode ? 'bg-cyber-dark border-yellow-400 text-yellow-400' : 'bg-white border-orange-400 text-orange-500'}`}
               title="Toggle Day/Night Mode"
             >
-              {isNightMode ? <SunIcon className="w-5 h-5" /> : <MoonIcon className="w-5 h-5" />}
+              {isNightMode ? <SunIcon className="w-4 h-4" /> : <MoonIcon className="w-4 h-4" />}
             </button>
 
             <div className={`flex ${isNightMode ? 'bg-cyber-dark' : 'bg-white'} border ${s.headerBorder} rounded overflow-hidden`}>
               <button 
                 onClick={() => setLanguage('id')}
-                className={`px-3 py-1 text-xs font-bold transition-all ${language === 'id' ? 'bg-cyber-cyan text-black' : `${s.textSub} hover:${s.textHeading}`}`}
+                className={`px-2 py-1 text-xs font-bold transition-all ${language === 'id' ? 'bg-cyber-cyan text-black' : `${s.textSub} hover:${s.textHeading}`}`}
               >
                 ID
               </button>
               <button 
                 onClick={() => setLanguage('en')}
-                className={`px-3 py-1 text-xs font-bold transition-all ${language === 'en' ? 'bg-cyber-cyan text-black' : `${s.textSub} hover:${s.textHeading}`}`}
+                className={`px-2 py-1 text-xs font-bold transition-all ${language === 'en' ? 'bg-cyber-cyan text-black' : `${s.textSub} hover:${s.textHeading}`}`}
               >
                 EN
               </button>
-            </div>
-            <div className="hidden sm:block text-xs font-mono text-cyber-cyan border border-cyber-cyan/30 px-2 py-1 rounded">
-              {t.subtitle}
             </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 py-8 grid lg:grid-cols-12 gap-8">
+      {/* Main Workspace */}
+      <div className="flex flex-1 overflow-hidden relative">
         
-        {/* Sidebar / Controls */}
-        <div className="lg:col-span-4 space-y-8">
-          
-          {/* Mode Selector */}
-          <div className="space-y-4">
-            <h2 className="text-cyber-cyan font-display text-lg border-l-4 border-cyber-pink pl-3 uppercase">{t.sections.module}</h2>
-            <div className="grid grid-cols-1 gap-3">
-              {/* Photo Generator Category */}
-              <div className="mb-2">
-                 <p className={`text-xs ${s.textSub} mb-2 uppercase tracking-widest`}>{t.sections.catPhoto}</p>
-                 <div className="space-y-2">
-                  <button 
-                    onClick={() => handleModeChange(AppMode.PRODUCT)}
-                    className={`w-full flex items-center gap-3 p-4 border ${s.cardBorder} hover:border-cyber-cyan transition-all group ${s.cardBg} ${mode === AppMode.PRODUCT ? `${s.activeMode} border-cyber-cyan ${s.activeModeBorder}` : ''}`}
-                  >
-                    <PhotoIcon className={`w-6 h-6 ${mode === AppMode.PRODUCT ? 'text-cyber-cyan' : s.textSub}`} />
-                    <div className="text-left">
-                      <div className={`font-display font-bold ${mode === AppMode.PRODUCT ? s.textHeading : 'text-gray-400 group-hover:text-cyber-cyan'}`}>
-                        {t.modules[AppMode.PRODUCT].title}
-                      </div>
-                      <div className={`text-xs ${s.textSub}`}>{t.modules[AppMode.PRODUCT].desc}</div>
-                    </div>
-                  </button>
-                  
-                  <button 
-                    onClick={() => handleModeChange(AppMode.CHARACTER)}
-                    className={`w-full flex items-center gap-3 p-4 border ${s.cardBorder} hover:border-cyber-pink transition-all group ${s.cardBg} ${mode === AppMode.CHARACTER ? `${s.activeMode} border-cyber-pink ${s.activeModeBorder}` : ''}`}
-                  >
-                    <UserIcon className={`w-6 h-6 ${mode === AppMode.CHARACTER ? 'text-cyber-pink' : s.textSub}`} />
-                    <div className="text-left">
-                      <div className={`font-display font-bold ${mode === AppMode.CHARACTER ? s.textHeading : 'text-gray-400 group-hover:text-cyber-pink'}`}>
-                        {t.modules[AppMode.CHARACTER].title}
-                      </div>
-                      <div className={`text-xs ${s.textSub}`}>{t.modules[AppMode.CHARACTER].desc}</div>
-                    </div>
-                  </button>
+        {/* Navigation Sidebar */}
+        <aside className={`
+          absolute lg:static inset-y-0 left-0 z-40 w-64 ${s.sidebarBg} border-r ${s.cardBorder} backdrop-blur-xl transform transition-transform duration-300 ease-in-out
+          flex flex-col
+          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        `}>
+          <div className="p-4 space-y-8 flex-1 overflow-y-auto">
 
-                  <button 
-                    onClick={() => handleModeChange(AppMode.BLENDER)}
-                    className={`w-full flex items-center gap-3 p-4 border ${s.cardBorder} hover:border-cyber-green transition-all group ${s.cardBg} ${mode === AppMode.BLENDER ? `${s.activeMode} border-cyber-green ${s.activeModeBorder}` : ''}`}
-                  >
-                    <SwatchIcon className={`w-6 h-6 ${mode === AppMode.BLENDER ? 'text-cyber-green' : s.textSub}`} />
-                    <div className="text-left">
-                      <div className={`font-display font-bold ${mode === AppMode.BLENDER ? s.textHeading : 'text-gray-400 group-hover:text-cyber-green'}`}>
-                        {t.modules[AppMode.BLENDER].title}
-                      </div>
-                      <div className={`text-xs ${s.textSub}`}>{t.modules[AppMode.BLENDER].desc}</div>
-                    </div>
-                  </button>
-                 </div>
-              </div>
-
-              {/* Prompt Generator Category */}
-              <div>
-                 <p className={`text-xs ${s.textSub} mb-2 uppercase tracking-widest`}>{t.sections.catPrompt}</p>
-                 <button 
-                    onClick={() => handleModeChange(AppMode.PROMPT_VIDEO)}
-                    className={`w-full flex items-center gap-3 p-4 border ${s.cardBorder} hover:border-cyber-yellow transition-all group ${s.cardBg} ${mode === AppMode.PROMPT_VIDEO ? `${s.activeMode} border-cyber-yellow ${s.activeModeBorder}` : ''}`}
-                  >
-                    <VideoCameraIcon className={`w-6 h-6 ${mode === AppMode.PROMPT_VIDEO ? 'text-cyber-yellow' : s.textSub}`} />
-                    <div className="text-left">
-                      <div className={`font-display font-bold ${mode === AppMode.PROMPT_VIDEO ? s.textHeading : 'text-gray-400 group-hover:text-cyber-yellow'}`}>
-                        {t.modules[AppMode.PROMPT_VIDEO].title}
-                      </div>
-                      <div className={`text-xs ${s.textSub}`}>{t.modules[AppMode.PROMPT_VIDEO].desc}</div>
-                    </div>
-                  </button>
-              </div>
-
+            {/* Main Dashboard Group */}
+            <div>
+              <p className={`text-xs ${s.textSub} mb-3 uppercase tracking-widest font-bold border-b ${s.headerBorder} pb-1`}>
+                {t.sections.catMain}
+              </p>
+              <SidebarItem modeKey={AppMode.HOME} icon={HomeIcon} colorClass="text-white" />
             </div>
+            
+            {/* Photo Generators Group */}
+            <div>
+              <p className={`text-xs ${s.textSub} mb-3 uppercase tracking-widest font-bold border-b ${s.headerBorder} pb-1`}>
+                {t.sections.catPhoto}
+              </p>
+              <div className="space-y-1">
+                <SidebarItem modeKey={AppMode.PRODUCT} icon={PhotoIcon} colorClass="text-cyber-cyan" />
+                <SidebarItem modeKey={AppMode.CHARACTER} icon={UserIcon} colorClass="text-cyber-pink" />
+                <SidebarItem modeKey={AppMode.BLENDER} icon={SwatchIcon} colorClass="text-cyber-green" />
+              </div>
+            </div>
+
+            {/* Prompt Generators Group */}
+            <div>
+              <p className={`text-xs ${s.textSub} mb-3 uppercase tracking-widest font-bold border-b ${s.headerBorder} pb-1`}>
+                {t.sections.catPrompt}
+              </p>
+              <div className="space-y-1">
+                <SidebarItem modeKey={AppMode.PROMPT_VIDEO} icon={VideoCameraIcon} colorClass="text-cyber-yellow" />
+              </div>
+            </div>
+
           </div>
-        </div>
+          
+          <div className="p-4 border-t border-cyber-gray bg-black/20">
+             <div className="text-[10px] font-mono text-center opacity-50">
+               SYSTEM v1.0<br/>GEMINI NANO
+             </div>
+          </div>
+        </aside>
 
         {/* Content Area */}
-        <div className="lg:col-span-8 space-y-6">
+        <main className="flex-1 overflow-y-auto p-4 lg:p-6 scroll-smooth">
+          <div className="max-w-[1920px] mx-auto h-full">
           
-          {mode === AppMode.PROMPT_VIDEO ? (
-            // --- VIDEO PROMPT GENERATOR FORM ---
-            <div className={`animate-in slide-in-from-right duration-500`}>
-              <div className={`p-6 rounded-xl ${s.cardBg} border ${s.cardBorder} space-y-8`}>
+          {mode === AppMode.HOME ? (
+            // --- HOME DASHBOARD ---
+            <div className="flex flex-col items-center justify-center min-h-[80vh] text-center space-y-8 animate-in fade-in zoom-in duration-500">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-cyber-cyan blur-3xl opacity-20 animate-pulse"></div>
+                  <h1 className="text-6xl md:text-8xl font-display font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-white via-cyber-cyan to-cyber-pink relative z-10 cyber-glitch" data-text="FANNSTUDIO">
+                      FANNSTUDIO
+                  </h1>
+                </div>
+                <p className="text-xl md:text-3xl font-body font-light tracking-widest text-cyber-cyan/80 uppercase">
+                  {t.home.slogan}
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 max-w-4xl w-full px-4">
+                  <button onClick={() => handleModeChange(AppMode.PRODUCT)} className={`p-6 border ${s.cardBorder} ${s.cardBg} rounded-xl backdrop-blur-md hover:border-cyber-cyan transition-all group`}>
+                      <PhotoIcon className="w-12 h-12 text-cyber-cyan mb-4 mx-auto group-hover:scale-110 transition-transform"/>
+                      <h3 className="text-lg font-bold font-display text-white">AI Visuals</h3>
+                      <p className={`text-sm ${s.textSub} mt-2`}>High-fidelity image generation & editing.</p>
+                  </button>
+                    <button onClick={() => handleModeChange(AppMode.CHARACTER)} className={`p-6 border ${s.cardBorder} ${s.cardBg} rounded-xl backdrop-blur-md hover:border-cyber-pink transition-all group`}>
+                      <UserIcon className="w-12 h-12 text-cyber-pink mb-4 mx-auto group-hover:scale-110 transition-transform"/>
+                      <h3 className="text-lg font-bold font-display text-white">Character Lab</h3>
+                      <p className={`text-sm ${s.textSub} mt-2`}>Conceptualize unique avatars.</p>
+                  </button>
+                    <button onClick={() => handleModeChange(AppMode.PROMPT_VIDEO)} className={`p-6 border ${s.cardBorder} ${s.cardBg} rounded-xl backdrop-blur-md hover:border-cyber-yellow transition-all group`}>
+                      <VideoCameraIcon className="w-12 h-12 text-cyber-yellow mb-4 mx-auto group-hover:scale-110 transition-transform"/>
+                      <h3 className="text-lg font-bold font-display text-white">Video Prompts</h3>
+                      <p className={`text-sm ${s.textSub} mt-2`}>Optimized for Sora & Veo.</p>
+                  </button>
+                </div>
+
+                <div className="mt-12 text-xs font-mono text-gray-500 border border-gray-800 px-4 py-2 rounded-full">
+                  {t.home.status} // {t.home.welcome}
+                </div>
+            </div>
+          ) : mode === AppMode.PROMPT_VIDEO ? (
+            // --- VIDEO PROMPT GENERATOR FORM (Full Width) ---
+            <div className={`animate-in slide-in-from-bottom duration-500 max-w-4xl mx-auto`}>
+              <div className={`p-6 rounded-xl ${s.cardBg} border ${s.cardBorder} space-y-8 mb-20`}>
                  <h2 className={`font-display text-xl font-bold text-center ${s.textHeading} border-b ${s.headerBorder} pb-4`}>
                    APLIKASI PROMPT GENERATOR BY FANNSTUDIO
                  </h2>
@@ -760,10 +797,11 @@ const App: React.FC = () => {
               </div>
             </div>
           ) : (
-            // --- PHOTO GENERATOR LAYOUT ---
-            <div className={`grid lg:grid-cols-12 gap-8`}>
-               {/* Controls */}
-               <div className="lg:col-span-4 space-y-8">
+            // --- PHOTO GENERATOR LAYOUT (Split Screen) ---
+            <div className={`flex flex-col xl:flex-row gap-6 pb-20`}>
+               
+               {/* Config/Input Panel */}
+               <div className="w-full xl:w-[400px] flex-shrink-0 space-y-6">
                   {/* Upload Section - Dynamic based on Mode */}
                   <div className={`space-y-4 p-4 rounded-xl ${s.cardBg} border ${s.cardBorder}`}>
                     <h2 className="text-cyber-cyan font-display text-lg border-l-4 border-cyber-pink pl-3 uppercase">{t.sections.input}</h2>
@@ -957,7 +995,7 @@ const App: React.FC = () => {
 
                   {/* Directives Section */}
                   <div className={`space-y-4 p-4 rounded-xl ${s.cardBg} border ${s.cardBorder}`}>
-                    {mode !== AppMode.PRODUCT && (
+                    
                       <>
                         <h2 className="text-cyber-cyan font-display text-lg border-l-4 border-cyber-pink pl-3 uppercase">{t.sections.directives}</h2>
                         <textarea
@@ -978,7 +1016,7 @@ const App: React.FC = () => {
                           ))}
                         </div>
                       </>
-                    )}
+                    
 
                     {error && (
                       <div className="p-3 border border-red-500 bg-red-900/20 text-red-400 text-sm font-bold">
@@ -1008,7 +1046,7 @@ const App: React.FC = () => {
                </div>
 
                {/* Output Section (Photo) */}
-               <div className="lg:col-span-8">
+               <div className="flex-1">
                   <div className={`h-full min-h-[500px] border-2 ${s.cardBorder} ${s.cardBg} relative flex flex-col items-center justify-center p-4 cyber-border transition-colors duration-500`}>
                     
                     {/* Corner Accents */}
@@ -1022,7 +1060,7 @@ const App: React.FC = () => {
                         <img 
                           src={resultImage} 
                           alt="Generated Output" 
-                          className={`max-h-[70vh] w-auto object-contain shadow-2xl shadow-cyber-cyan/20 border ${s.cardBorder}`}
+                          className={`max-h-[80vh] w-auto object-contain shadow-2xl shadow-cyber-cyan/20 border ${s.cardBorder}`}
                         />
                         <div className="mt-6 flex gap-4">
                           <a 
@@ -1059,13 +1097,10 @@ const App: React.FC = () => {
             </div>
           )}
 
-        </div>
+          </div>
+        </main>
+      </div>
 
-      </main>
-
-      <footer className={`fixed bottom-0 w-full border-t ${s.headerBorder} ${s.headerBg} text-center py-2 z-40 backdrop-blur-sm`}>
-        <p className={`text-[10px] ${s.textSub} font-mono`}>FANNSTUDIO SYSTEM v1.0 // POWERED BY GEMINI NANO BANANA</p>
-      </footer>
     </div>
   );
 };

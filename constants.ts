@@ -5,15 +5,25 @@ export const TRANSLATIONS = {
     appTitle: "FANN",
     appTitleSuffix: "STUDIO",
     subtitle: "GEMINI.NANO.BANANA",
+    home: {
+      slogan: "Turn Imagination into Digital Reality.",
+      welcome: "Select a module to begin your creative protocol.",
+      status: "SYSTEM READY"
+    },
     sections: {
       module: "Select Module",
       input: "Input Data",
       config: "Configuration",
       directives: "Directives",
       catPhoto: "Photo Generator",
-      catPrompt: "Prompt Generator"
+      catPrompt: "Prompt Generator",
+      catMain: "Dashboard"
     },
     modules: {
+      [AppMode.HOME]: {
+        title: "Home",
+        desc: "Main Dashboard"
+      },
       [AppMode.PRODUCT]: {
         title: "Poster Maker",
         desc: "Professional Design & Layout"
@@ -91,7 +101,8 @@ export const TRANSLATIONS = {
       }
     },
     placeholders: {
-      [AppMode.PRODUCT]: "Describe the poster theme (e.g., sci-fi movie, concert event, minimalist ad)...",
+      [AppMode.HOME]: "",
+      [AppMode.PRODUCT]: "Additional instructions (e.g., Specific lighting, color palette, background elements, mood)...",
       [AppMode.CHARACTER]: "Describe the character details (e.g., cyberpunk samurai)...",
       [AppMode.BLENDER]: "How should these images be combined? (Optional additional details)",
       [AppMode.PROMPT_VIDEO]: ""
@@ -111,12 +122,14 @@ export const TRANSLATIONS = {
     },
     prompts: {
       system: {
+        [AppMode.HOME]: "",
         [AppMode.PRODUCT]: "You are an expert graphic designer and poster artist. Your task is to take a raw image and transform it into a stunning professional poster design with high visual impact.",
         [AppMode.CHARACTER]: "You are a concept artist and character designer.",
         [AppMode.BLENDER]: "You are a surrealist digital artist expert at photobashing and blending.",
         [AppMode.PROMPT_VIDEO]: "You are an expert AI Video Prompt Engineer specializing in Google Veo 3 and Sora. Your task is to take structured video production data and compile it into highly optimized prompts."
       },
       prefix: {
+        [AppMode.HOME]: "",
         [AppMode.PRODUCT]: "Create a professional poster design. ",
         [AppMode.CHARACTER]: "Turn the person in this photo into a character based on these instructions: ",
         [AppMode.BLENDER]: "Seamlessly blend these images into a single cohesive artwork. ",
@@ -126,6 +139,7 @@ export const TRANSLATIONS = {
         [AppMode.CHARACTER]: "Create a high-quality character illustration based on these instructions: "
       },
       suffix: {
+        [AppMode.HOME]: "",
         [AppMode.PRODUCT]: " Ensure a striking composition, bold visual style, and professional poster aesthetic. Make it eye-catching and thematic, suitable for print or digital display.",
         [AppMode.CHARACTER]: " Keep facial features recognizable if provided. Apply the requested style extensively. High quality, detailed.",
         [AppMode.BLENDER]: " Ensure lighting and perspective match consistently across the blended result.",
@@ -133,6 +147,7 @@ export const TRANSLATIONS = {
       }
     },
     presets: {
+      [AppMode.HOME]: [],
       [AppMode.PRODUCT]: ["Sci-fi Movie Poster", "Music Festival Poster", "Minimalist Product Ad", "Retro Travel Poster"],
       [AppMode.CHARACTER]: ["Cyborg Cyberpunk", "Fantasy Elf Warrior", "Noir Detective", "Space Marine"],
       [AppMode.BLENDER]: ["Merge into a surreal landscape", "Create a double exposure effect", "Combine into a movie poster", "Cybernetic fusion"],
@@ -150,15 +165,25 @@ export const TRANSLATIONS = {
     appTitle: "FANN",
     appTitleSuffix: "STUDIO",
     subtitle: "GEMINI.NANO.BANANA",
+    home: {
+      slogan: "Ubah Imajinasi Menjadi Realitas Digital.",
+      welcome: "Pilih modul dari sidebar untuk memulai protokol kreatif Anda.",
+      status: "SISTEM SIAP"
+    },
     sections: {
       module: "Pilih Modul",
       input: "Data Input",
       config: "Konfigurasi",
       directives: "Instruksi",
       catPhoto: "Foto Generator",
-      catPrompt: "Prompt Generator"
+      catPrompt: "Prompt Generator",
+      catMain: "Dashboard"
     },
     modules: {
+      [AppMode.HOME]: {
+        title: "Beranda",
+        desc: "Dashboard Utama"
+      },
       [AppMode.PRODUCT]: {
         title: "Pembuat Poster",
         desc: "Desain & Layout Profesional"
@@ -236,7 +261,8 @@ export const TRANSLATIONS = {
       }
     },
     placeholders: {
-      [AppMode.PRODUCT]: "Jelaskan tema poster (cth: film sci-fi, acara konser, iklan minimalis)...",
+      [AppMode.HOME]: "",
+      [AppMode.PRODUCT]: "Instruksi tambahan (cth: Pencahayaan dramatis, palet warna neon, latar belakang kota)...",
       [AppMode.CHARACTER]: "Jelaskan detail karakter (cth: samurai cyberpunk)...",
       [AppMode.BLENDER]: "Bagaimana gambar-gambar ini harus digabungkan? (Opsional detail tambahan)",
       [AppMode.PROMPT_VIDEO]: ""
@@ -256,12 +282,14 @@ export const TRANSLATIONS = {
     },
     prompts: {
       system: {
+        [AppMode.HOME]: "",
         [AppMode.PRODUCT]: "Anda adalah desainer grafis dan seniman poster ahli. Tugas Anda adalah mengambil gambar mentah dan mengubahnya menjadi desain poster profesional yang menakjubkan dengan dampak visual yang tinggi.",
         [AppMode.CHARACTER]: "Anda adalah seniman konsep dan perancang karakter.",
         [AppMode.BLENDER]: "Anda adalah ahli seniman digital surealis dalam photobashing dan blending.",
         [AppMode.PROMPT_VIDEO]: "Anda adalah Ahli Prompt Video AI yang berspesialisasi dalam Google Veo 3 dan Sora. Tugas Anda adalah mengambil data produksi video terstruktur dan menyusunnya menjadi prompt yang sangat optimal."
       },
       prefix: {
+        [AppMode.HOME]: "",
         [AppMode.PRODUCT]: "Buat desain poster profesional. ",
         [AppMode.CHARACTER]: "Ubah orang dalam foto ini menjadi karakter berdasarkan instruksi ini: ",
         [AppMode.BLENDER]: "Gabungkan gambar-gambar ini dengan mulus menjadi satu karya seni yang padu. ",
@@ -271,6 +299,7 @@ export const TRANSLATIONS = {
         [AppMode.CHARACTER]: "Buat ilustrasi karakter berkualitas tinggi berdasarkan instruksi ini: "
       },
       suffix: {
+        [AppMode.HOME]: "",
         [AppMode.PRODUCT]: " Pastikan komposisi yang mencolok, gaya visual yang berani, dan estetika poster profesional. Buatlah menarik perhatian dan tematik, cocok untuk cetak atau tampilan digital.",
         [AppMode.CHARACTER]: " Pertahankan fitur wajah agar tetap dapat dikenali jika foto disediakan. Terapkan gaya seni yang diminta secara ekstensif. Kualitas tinggi, detail.",
         [AppMode.BLENDER]: " Pastikan pencahayaan dan perspektif cocok secara konsisten di seluruh hasil gabungan.",
@@ -278,6 +307,7 @@ export const TRANSLATIONS = {
       }
     },
     presets: {
+      [AppMode.HOME]: [],
       [AppMode.PRODUCT]: ["Poster Film Sci-fi", "Poster Festival Musik", "Iklan Produk Minimalis", "Poster Travel Retro"],
       [AppMode.CHARACTER]: ["Cyborg Cyberpunk", "Prajurit Elf Fantasi", "Detektif Noir", "Marinir Luar Angkasa"],
       [AppMode.BLENDER]: ["Gabungkan ke lanskap surealis", "Buat efek eksposur ganda", "Gabungkan menjadi poster film", "Fusi sibernetik"],

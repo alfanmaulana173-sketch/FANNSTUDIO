@@ -1,4 +1,5 @@
 export enum AppMode {
+  HOME = 'HOME',
   PRODUCT = 'PRODUCT',
   CHARACTER = 'CHARACTER',
   BLENDER = 'BLENDER',
