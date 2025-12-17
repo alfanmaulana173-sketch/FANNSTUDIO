@@ -74,3 +74,22 @@ export interface PromptGenOutput {
   json: string;
   simple: string;
 }
+
+// Global Window Extensions for AI Studio integration
+declare global {
+  interface AIStudio {
+    hasSelectedApiKey: () => Promise<boolean>;
+    openSelectKey: () => Promise<void>;
+  }
+
+  interface Window {
+    aistudio?: AIStudio;
+    process?: {
+      env: {
+        API_KEY?: string;
+        NODE_ENV?: string;
+        [key: string]: any;
+      }
+    }
+  }
+}
