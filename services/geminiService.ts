@@ -6,7 +6,10 @@ const IMAGE_MODEL_NAME = 'gemini-2.5-flash-image';
 // Using Flash for text tasks (Prompt Generation)
 const TEXT_MODEL_NAME = 'gemini-2.5-flash';
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Helper to initialize AI only when needed, preventing startup crashes if env is missing
+const getAiClient = () => {
+  return new GoogleGenAI({ apiKey: process.env.API_KEY });
+};
 
 export const generateAIImage = async (
   prompt: string,
@@ -15,6 +18,7 @@ export const generateAIImage = async (
   aspectRatio: AspectRatio = "1:1"
 ): Promise<string> => {
   try {
+    const ai = getAiClient();
     const parts: any[] = [];
 
     // Add images to parts
@@ -70,6 +74,7 @@ export const generateTextResponse = async (
   systemInstruction: string
 ): Promise<string> => {
   try {
+    const ai = getAiClient();
     const response = await ai.models.generateContent({
       model: TEXT_MODEL_NAME,
       contents: prompt,

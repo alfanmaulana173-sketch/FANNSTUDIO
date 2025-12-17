@@ -7,6 +7,15 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet">
     <script>
+      // Polyfill for process.env to prevent "process is not defined" errors in browser
+      window.process = {
+        env: {
+          NODE_ENV: 'production',
+          ...window.process?.env
+        }
+      };
+    </script>
+    <script>
       tailwind.config = {
         theme: {
           extend: {
