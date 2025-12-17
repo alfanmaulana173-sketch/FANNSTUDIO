@@ -21,8 +21,7 @@ import {
   Bars3Icon,
   XMarkIcon,
   HomeIcon,
-  FingerPrintIcon,
-  ShieldCheckIcon
+  FingerPrintIcon // Kept for sidebar button icon
 } from '@heroicons/react/24/outline';
 import { SunIcon as SunIconSolid, MoonIcon as MoonIconSolid } from '@heroicons/react/24/solid';
 
@@ -94,7 +93,6 @@ const App: React.FC = () => {
   const [language, setLanguage] = useState<Language>('id');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Mobile sidebar toggle
   const [isKeyReady, setIsKeyReady] = useState<boolean>(false);
-  const [isCheckingKey, setIsCheckingKey] = useState<boolean>(true);
   
   // Generic Input (Used for Reference in Product/Character and Sources in Blender)
   const [inputImages, setInputImages] = useState<ImageFile[]>([]);
@@ -148,7 +146,7 @@ const App: React.FC = () => {
 
   const t = TRANSLATIONS[language];
 
-  // Check for API Key on mount
+  // Check for API Key on mount (Passive check, doesn't block)
   useEffect(() => {
     const checkKey = async () => {
       try {
@@ -162,9 +160,7 @@ const App: React.FC = () => {
         }
       } catch (err) {
         console.error("Error checking API key status:", err);
-        setIsKeyReady(true); // Default to allow access to UI, error will catch on generation if missing
-      } finally {
-        setIsCheckingKey(false);
+        setIsKeyReady(true); // Default to allow access to UI
       }
     };
     checkKey();
@@ -283,7 +279,30 @@ const App: React.FC = () => {
      }));
   };
 
+  // Helper to ensure auth before generating
+  const ensureAuth = async (): Promise<boolean> => {
+    if (window.aistudio && !isKeyReady) {
+       await handleConnectKey();
+       // Re-verify
+       try {
+         const hasKey = await window.aistudio.hasSelectedApiKey();
+         setIsKeyReady(hasKey);
+         if (!hasKey) {
+           setError("Google Account connection required to proceed.");
+           return false;
+         }
+         return true;
+       } catch (e) {
+         setError("Auth check failed. Please retry.");
+         return false;
+       }
+    }
+    return true;
+  };
+
   const handleGeneratePrompt = async () => {
+    if (!(await ensureAuth())) return;
+
     setIsGenerating(true);
     setError(null);
     
@@ -338,6 +357,8 @@ const App: React.FC = () => {
       await handleGeneratePrompt();
       return;
     }
+
+    if (!(await ensureAuth())) return;
 
     setError(null);
     let finalInputImages: ImageFile[] = [];
@@ -516,46 +537,6 @@ const App: React.FC = () => {
     </button>
   );
 
-  // --- RENDER SYSTEM ACCESS SCREEN IF NOT AUTHORIZED ---
-  if (!isKeyReady && !isCheckingKey) {
-    return (
-       <div className={`h-screen w-screen flex flex-col items-center justify-center relative overflow-hidden ${s.textMain}`}>
-         <Background isNight={isNightMode} />
-         <div className={`
-           p-8 md:p-12 rounded-2xl border-2 ${s.cardBorder} ${s.cardBg}
-           flex flex-col items-center max-w-md w-full mx-4 relative cyber-border shadow-2xl
-           animate-in zoom-in fade-in duration-500
-         `}>
-           <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-cyber-pink"></div>
-           <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-cyber-pink"></div>
-           <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-cyber-pink"></div>
-           <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-cyber-pink"></div>
-
-           <ShieldCheckIcon className="w-20 h-20 text-cyber-cyan mb-6 animate-pulse" />
-           <h1 className="text-3xl font-display font-black text-center mb-2 tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyber-cyan to-cyber-pink">
-             SYSTEM LOCKED
-           </h1>
-           <p className="text-center font-mono text-sm mb-8 text-gray-400">
-             AUTHENTICATION REQUIRED TO ACCESS FANNSTUDIO NEURAL INTERFACE.
-           </p>
-
-           <CyberButton 
-             onClick={handleConnectKey}
-             variant="pink"
-             className="w-full flex justify-center items-center gap-2 py-4"
-           >
-             <FingerPrintIcon className="w-6 h-6" />
-             CONNECT GOOGLE ACCOUNT
-           </CyberButton>
-           
-           <div className="mt-6 text-[10px] text-gray-500 font-mono text-center">
-             SECURE CONNECTION :: GOOGLE AI STUDIO :: 2025
-           </div>
-         </div>
-       </div>
-    );
-  }
-
   // --- MAIN APP RENDER ---
   return (
     <div className={`h-screen flex flex-col ${s.textMain} font-body selection:bg-cyber-pink selection:text-white overflow-hidden relative`}>
@@ -647,9 +628,20 @@ const App: React.FC = () => {
 
           </div>
           
-          <div className="p-4 border-t border-cyber-gray bg-black/20">
+          <div className="p-4 border-t border-cyber-gray bg-black/20 flex flex-col gap-2">
+             {/* Non-intrusive Connect Button in Sidebar */}
+             {window.aistudio && !isKeyReady && (
+                <button 
+                  onClick={handleConnectKey}
+                  className="w-full flex items-center justify-center gap-2 py-2 text-xs font-bold text-cyber-pink border border-cyber-pink hover:bg-cyber-pink hover:text-black transition-colors rounded mb-1 animate-pulse"
+                >
+                  <FingerPrintIcon className="w-3 h-3" />
+                  CONNECT GOOGLE
+                </button>
+             )}
+
              <div className="text-[10px] font-mono text-center opacity-50">
-               SYSTEM v1.0<br/>GEMINI NANO
+               SYSTEM v1.0<br/>GEMINI NANO :: {isKeyReady ? 'ONLINE' : 'OFFLINE'}
              </div>
           </div>
         </aside>
